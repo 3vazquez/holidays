@@ -210,7 +210,74 @@ function validarFecha(fechaStr) {
     return { valid: true };
 }
 
-// API Handler principal
+// NUEVA FUNCIÓN: Sumar/Restar días laborables
+function addWorkingDays(startDateStr, daysToAdd) {
+    const result = validarFecha(startDateStr);
+    if (!result.valid) return result;
+    
+    if (daysToAdd === 0) {
+        return {
+            original_date: startDateStr,
+            days_to_add: 0,
+            result_date: startDateStr,
+            is_working_day: esDiaLaborable(startDateStr),
+            details: "No se agregaron días"
+        };
+    }
+    
+    let currentDate = new Date(startDateStr);
+    let workingDaysAdded = 0;
+    const direction = daysToAdd > 0 ? 1 : -1;
+    const absoluteDays = Math.abs(daysToAdd);
+    let daysChecked = 0;
+    
+    // Para llevar registro de feriados y fines de semana saltados
+    const skippedDates = {
+        weekends: [],
+        holidays: []
+    };
+    
+    while (workingDaysAdded < absoluteDays) {
+        currentDate.setDate(currentDate.getDate() + direction);
+        const currentStr = currentDate.toISOString().split('T')[0];
+        daysChecked++;
+        
+        if (esDiaLaborable(currentStr)) {
+            workingDaysAdded++;
+        } else {
+            if (esFinDeSemana(currentStr)) {
+                skippedDates.weekends.push(currentStr);
+            } else if (esFeriado(currentStr)) {
+                skippedDates.holidays.push({
+                    date: currentStr,
+                    name: getNombreFeriado(currentStr)
+                });
+            }
+        }
+    }
+    
+    const resultDateStr = currentDate.toISOString().split('T')[0];
+    const operation = daysToAdd > 0 ? "sumar" : "restar";
+    
+    return {
+        original_date: startDateStr,
+        days_to_add: daysToAdd,
+        operation: operation,
+        result_date: resultDateStr,
+        working_days_calculated: absoluteDays,
+        total_days_advanced: daysChecked,
+        is_working_day: esDiaLaborable(resultDateStr),
+        skipped_weekends: skippedDates.weekends.length,
+        skipped_holidays: skippedDates.holidays.length,
+        details: {
+            weekends_skipped: skippedDates.weekends,
+            holidays_skipped: skippedDates.holidays
+        },
+        example_usage: `Desde ${startDateStr}, ${operation} ${Math.abs(daysToAdd)} días laborables = ${resultDateStr}`
+    };
+}
+
+// FUNCIÓN ACTUALIZADA: API Handler con nueva acción
 function handleAPIRequest() {
     const urlParams = new URLSearchParams(window.location.search);
     const action = urlParams.get('action') || 'check';
@@ -237,17 +304,43 @@ function handleAPIRequest() {
             if (!validEnd.valid) return validEnd;
             return getWorkingDaysDifference(start, end);
             
+        case 'add_days':  // NUEVA FUNCIONALIDAD
+            const addDate = urlParams.get('date');
+            const daysParam = urlParams.get('days');
+            
+            if (!addDate || !daysParam) {
+                return { 
+                    error: "Faltan parámetros 'date' y/o 'days'", 
+                    usage: "?action=add_days&date=YYYY-MM-DD&days=N",
+                    examples: {
+                        sumar_5: "?action=add_days&date=2025-07-01&days=5",
+                        restar_3: "?action=add_days&date=2025-07-01&days=-3"
+                    }
+                };
+            }
+            
+            const validAddDate = validarFecha(addDate);
+            if (!validAddDate.valid) return validAddDate;
+            
+            const days = parseInt(daysParam);
+            if (isNaN(days)) {
+                return { error: "El parámetro 'days' debe ser un número entero", received: daysParam };
+            }
+            
+            return addWorkingDays(addDate, days);
+            
         case 'check':
         default:
             const checkDate = urlParams.get('date');
             if (!checkDate) {
                 return {
                     error: "Falta parámetro 'date'",
-                    available_actions: ["check", "next", "diff"],
+                    available_actions: ["check", "next", "diff", "add_days"],
                     usage: {
                         check: "?date=YYYY-MM-DD",
                         next: "?action=next&date=YYYY-MM-DD",
-                        diff: "?action=diff&start=YYYY-MM-DD&end=YYYY-MM-DD"
+                        diff: "?action=diff&start=YYYY-MM-DD&end=YYYY-MM-DD",
+                        add_days: "?action=add_days&date=YYYY-MM-DD&days=N"
                     }
                 };
             }
@@ -255,6 +348,58 @@ function handleAPIRequest() {
             if (!validCheck.valid) return validCheck;
             return calcularDiaLaborable(checkDate);
     }
+}
+
+// NUEVA FUNCIÓN PARA LA DEMO: Sumar días laborables
+function consultarAddDays() {
+    const fecha = document.getElementById('fechaAddDays').value;
+    const dias = document.getElementById('diasAddDays').value;
+    
+    if (!fecha) {
+        document.getElementById('resultadoAddDays').innerHTML = '<p style="color:red">❌ Selecciona una fecha</p>';
+        return;
+    }
+    
+    if (!dias || isNaN(dias)) {
+        document.getElementById('resultadoAddDays').innerHTML = '<p style="color:red">❌ Ingresa un número válido de días</p>';
+        return;
+    }
+    
+    const resultado = addWorkingDays(fecha, parseInt(dias));
+    
+    if (resultado.error) {
+        document.getElementById('resultadoAddDays').innerHTML = `<div class="result-card error">❌ ${resultado.error}</div>`;
+        return;
+    }
+    
+    let holidaysHtml = '';
+    if (resultado.details.holidays_skipped.length > 0) {
+        holidaysHtml = '<p><strong>🎉 Feriados omitidos:</strong></p><ul>';
+        resultado.details.holidays_skipped.forEach(h => {
+            holidaysHtml += `<li>${h.date} - ${h.name}</li>`;
+        });
+        holidaysHtml += '</ul>';
+    }
+    
+    let weekendsHtml = '';
+    if (resultado.details.weekends_skipped.length > 0) {
+        weekendsHtml = `<p><strong>📆 Fines de semana omitidos:</strong> ${resultado.details.weekends_skipped.length} días</p>`;
+    }
+    
+    document.getElementById('resultadoAddDays').innerHTML = `
+        <div class="result-card">
+            <p><strong>📅 Fecha original:</strong> ${resultado.original_date}</p>
+            <p><strong>🔢 Días a ${resultado.operation}:</strong> ${Math.abs(resultado.days_to_add)} día(s) laborable(s)</p>
+            <p><strong>➡️ Fecha resultante:</strong> ${resultado.result_date}</p>
+            <p><strong>✅ ¿Es día laborable?:</strong> ${resultado.is_working_day ? 'Sí' : 'No'}</p>
+            <p><strong>📊 Total días calendario avanzados:</strong> ${resultado.total_days_advanced}</p>
+            <p><strong>🔄 Fines de semana omitidos:</strong> ${resultado.skipped_weekends}</p>
+            <p><strong>🎉 Feriados omitidos:</strong> ${resultado.skipped_holidays}</p>
+            ${weekendsHtml}
+            ${holidaysHtml}
+            <p><small>💡 ${resultado.example_usage}</small></p>
+        </div>
+    `;
 }
 
 // Funciones para la demo
