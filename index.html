@@ -3,35 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>API Días Laborables USA</title>
+    <title>API Días Laborables USA - Completa</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
         <h1>📅 API Días Laborables - Estados Unidos</h1>
-        <p>Calcula si una fecha es día laborable en EE.UU. (excluyendo feriados federales)</p>
+        <p>Calcula días laborables, próximo día laborable y diferencia de días hábiles en EE.UU.</p>
         
         <div class="endpoint">
-            <h3>🔗 Endpoint público:</h3>
+            <h3>🔗 Endpoints públicos:</h3>
             <code>https://tu-usuario.github.io/public-holidays-api/?date=YYYY-MM-DD</code>
+            <code>https://tu-usuario.github.io/public-holidays-api/?action=next&date=YYYY-MM-DD</code>
+            <code>https://tu-usuario.github.io/public-holidays-api/?action=diff&start=YYYY-MM-DD&end=YYYY-MM-DD</code>
         </div>
 
         <div class="demo">
             <h3>🧪 Prueba la API:</h3>
-            <input type="date" id="fechaInput">
-            <button onclick="consultarAPI()">Consultar</button>
-            <div id="resultado"></div>
+            
+            <div class="demo-section">
+                <h4>1. Verificar día laborable</h4>
+                <input type="date" id="fechaCheck">
+                <button onclick="consultarCheck()">Consultar</button>
+                <div id="resultadoCheck"></div>
+            </div>
+
+            <div class="demo-section">
+                <h4>2. Próximo día laborable</h4>
+                <input type="date" id="fechaNext">
+                <button onclick="consultarNext()">Buscar próximo</button>
+                <div id="resultadoNext"></div>
+            </div>
+
+            <div class="demo-section">
+                <h4>3. Diferencia de días hábiles</h4>
+                <input type="date" id="fechaStart">
+                <span>→</span>
+                <input type="date" id="fechaEnd">
+                <button onclick="consultarDiff()">Calcular diferencia</button>
+                <div id="resultadoDiff"></div>
+            </div>
         </div>
 
         <div class="response-example">
-            <h3>📦 Ejemplo de respuesta:</h3>
+            <h3>📦 Ejemplos de respuesta:</h3>
             <pre>
+// Verificar día
 {
   "date": "2025-01-20",
   "is_working_day": false,
   "day_name": "Monday",
-  "reason": "Día de Martin Luther King Jr.",
-  "holiday": true
+  "reason": "Día de Martin Luther King Jr."
+}
+
+// Próximo día laborable
+{
+  "original_date": "2025-07-04",
+  "next_working_day": "2025-07-07",
+  "days_to_add": 3,
+  "reason": "Original era feriado (Día de la Independencia)"
+}
+
+// Diferencia de días hábiles
+{
+  "start_date": "2025-07-01",
+  "end_date": "2025-07-10",
+  "working_days_between": 6,
+  "holidays_in_range": ["2025-07-04"],
+  "weekend_days": 2
 }
             </pre>
         </div>
