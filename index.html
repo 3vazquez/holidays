@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Días Laborables USA</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>📅 API Días Laborables - Estados Unidos</h1>
+        <p>Calcula si una fecha es día laborable en EE.UU. (excluyendo feriados federales)</p>
+        
+        <div class="endpoint">
+            <h3>🔗 Endpoint público:</h3>
+            <code>https://tu-usuario.github.io/public-holidays-api/?date=YYYY-MM-DD</code>
+        </div>
+
+        <div class="demo">
+            <h3>🧪 Prueba la API:</h3>
+            <input type="date" id="fechaInput">
+            <button onclick="consultarAPI()">Consultar</button>
+            <div id="resultado"></div>
+        </div>
+
+        <div class="response-example">
+            <h3>📦 Ejemplo de respuesta:</h3>
+            <pre>
+{
+  "date": "2025-01-20",
+  "is_working_day": false,
+  "day_name": "Monday",
+  "reason": "Día de Martin Luther King Jr.",
+  "holiday": true
+}
+            </pre>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
