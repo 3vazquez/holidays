@@ -1,6 +1,6 @@
 # holidays
 API pública básica en GitHub que calcule días laborables en Estados Unidos, usando GitHub Pages + JavaScript (sin necesidad de servidor propio)
-
+https://3vazquez.github.io/holidays/?date=2025-01-20
 📌 Características
 ✅ Completamente gratis (GitHub Pages)
 ✅ Soporta hasta 2030 (puedes agregar más años)
