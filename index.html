@@ -17,6 +17,8 @@
             <code>https://3vazquez.github.io/holidays/?action=next&date=YYYY-MM-DD</code>
             <code>https://3vazquez.github.io/holidays/?action=diff&start=YYYY-MM-DD&end=YYYY-MM-DD</code>
             <code>https://3vazquez.github.io/holidays/?action=add_days&date=YYYY-MM-DD&days=N</code>
+            <code>https://3vazquez.github.io/holidays/?action=monthly&year=YYYY&month=M</code>
+            <code>https://3vazquez.github.io/holidays/?action=holidays&year=YYYY</code>
         </div>
 
         <div class="demo">
@@ -53,6 +55,45 @@
                 <div id="resultadoAddDays"></div>
                 <small>💡 Usa números positivos para sumar, negativos para restar</small>
             </div>
+
+            <!-- Agregar dentro del div class="demo" después de las otras secciones -->
+
+        <div class="demo-section">
+            <h4>5. Días hábiles por mes</h4>
+            <select id="anioMonthly">
+                <option value="2025">2025</option>
+                <option value="2026">2026</option>
+                <option value="2027">2027</option>
+            </select>
+            <select id="mesMonthly">
+                <option value="1">Enero</option>
+                <option value="2">Febrero</option>
+                <option value="3">Marzo</option>
+                <option value="4">Abril</option>
+                <option value="5">Mayo</option>
+                <option value="6">Junio</option>
+                <option value="7">Julio</option>
+                <option value="8">Agosto</option>
+                <option value="9">Septiembre</option>
+                <option value="10">Octubre</option>
+                <option value="11">Noviembre</option>
+                <option value="12">Diciembre</option>
+            </select>
+            <button onclick="consultarMonthly()">Consultar mes</button>
+            <div id="resultadoMonthly"></div>
+        </div>
+
+        <div class="demo-section">
+            <h4>6. Lista de feriados por año</h4>
+            <select id="anioHolidays">
+                <option value="2025">2025</option>
+                <option value="2026">2026</option>
+                <option value="2027">2027</option>
+                <option value="2028">2028</option>
+            </select>
+            <button onclick="consultarHolidays()">Ver feriados</button>
+            <div id="resultadoHolidays"></div>
+        </div>
         </div>
 
         <div class="response-example">
